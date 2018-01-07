@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mail sender</title>
+    <script src="socket.io.js"></script>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <script src="jquery-3.1.1.slim.min.js"></script>
+    <script src="popper.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+
+
+    <style type="text/css">
+        .text {
+            margin-bottom: -5px;
+        }
+
+        #main{
+            margin-top: 200px;
+
+        }
+        .center_div{
+            margin: 0 auto;
+            width:50% /* value of your choice which suits your alignment */
+        }
+
+        body{
+            background-color: #9e2323;
+        }
+
+        .hide{
+            display: none;
+        }
+        .center{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="center_div" style="text-align: center;" id="main">
+    <form id="send" action="/" method="post">
+        <div id="page1">
+            <div class="col-xs-5">
+                <input type="text" id="from" class="text form-control center" placeholder="from" name="id"><br>
+                <input type="text" id="subject" class="text form-control center" placeholder="subject"name="post"><br>
+                <textarea id="html" class="text form-control center" placeholder="code"></textarea><br>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-lg" style="width: 150px" id="start">start</button>
+
+
+
+    </form>
+    <button type="button" class="btn btn-primary btn-lg" style="width: 150px; position: absolute; top: 10px; right: 10px;" id="set">update list</button>
+
+
+
+</div>
+
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">enter your emails</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <textarea placeholder="list here" class="form-control" id="emails"></textarea>
+                    </div>
+                </form>
+            </div>
+            <span id="status"></span>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info" data-dismiss="modal">close</button>
+                <button type="button" class="btn btn-danger" id="save" >save</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="status_e" class="hide" style="position: absolute;
+    top: 20px;
+    left: 500px;">
+    <h5>sending to :</h5><span style="color: #005cbf; background-color: #0b2e13" ><h5 id="sto" style="background-color: #1b1e21">geting ...</h5></span>
+    <h5>comple :</h5><span style="color: #005cbf; background-color: #0b2e13" ><h5 id="so" style="background-color: #210404">0 <span style="color: red">from</span> 0</h5></span>
+
+</div>
+
+
+
+<script>
+    var socket = io();
+
+    socket.on('success',function () {
+        $("#save").removeAttr('disabled');
+        $("emails").val("");
+        $("#exampleModal").modal('hide');
+    });
+
+    socket.on('disabled',function () {
+        $("#main").find(":input").prop("disabled",true);
+    });
+
+    socket.on('endabled',function (data) {
+        $("#main").find(":input").removeAttr("disabled");
+        if (data)
+        {
+            $("#so").html("<span style='color: green'>comple "+ data +" </span>");
+        }
+    });
+
+
+    socket.on('status',function (data) {
+        data = JSON.parse(data);
+
+        $("#sto").text(data.to);
+        $("#so").html(data.n + ' <span style="color: red">from</span> '+data.f);
+        if (!$('#status_e').is(":visible"))
+        $('#status_e').removeClass('hide');
+    });
+
+
+
+</script>
+
+
+<script>
+    $('#set').click(function () {
+            $("#exampleModal").modal();
+    });
+
+    $('#save').click(function () {
+        $(this).attr('disabled','disabled');
+       var list = $('#emails').val().trim();
+       socket.emit('set',list);
+    });
+
+    $("#start").click(function () {
+
+        var data = {
+            from:$("#from").val(),
+            subject:$("#subject").val(),
+            code:$("#html").val()
+        }
+        localStorage.from = data.from;
+        localStorage.subject = data.subject;
+        localStorage.code = data.code;
+        socket.emit('start',JSON.stringify(data));
+    });
+
+</script>
+
+<script>
+
+    window.onload = function () {
+        $("#from").val(localStorage.from);
+        $("#subject").val(localStorage.subject);
+        $("#html").val(localStorage.code);
+    }
+
+</script>
+
+
+</body>
+</html>
