@@ -62,7 +62,7 @@ io.on('connection', function(socket){
 
     console.log('user is connected');
 });
-server.listen(3000);
+server.listen(process.env.PORT||3000);
 app.use(express.static('public'));
 
 //================
