@@ -6,13 +6,13 @@
 var express = require('express');
 var app = express();
 var nodemailer = require('nodemailer');
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey('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');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var run = false;
 var n = 0;
 var f = 0;
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey('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');
 io.on('connection', function(socket){
 
     if (run == true)
@@ -87,7 +87,7 @@ var transport = nodemailer.createTransport({
     port: 587,
     auth: {
         user: "apikey",
-        pass: "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"
+        pass: "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"
     }
 });
 
@@ -108,7 +108,8 @@ function sendemail(to) {
 
     mailOptions.to = to;
     console.log('sending to ' + JSON.stringify(mailOptions));
-sgMail.send(mailOptions,function(error, info){
+/*
+    transport.sendMail(mailOptions, function(error, info){
         if (error) {
             console.log(error);
         } else {
@@ -129,6 +130,28 @@ sgMail.send(mailOptions,function(error, info){
             }
         }
     });
-    );
+    */
+
+    sgMail.send(mailOptions,function(error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info);
+            n++;
+            if (n == f) {
+                console.log('success');
+                io.sockets.emit('endabled', n);
+                run = false;
+                n = 0;
+                f = 0;
+            }
+            else {
+                sendemail(list[n]);
+
+            }
+        }
+    });
+
+
 
 }
