@@ -6,6 +6,8 @@
 var express = require('express');
 var app = express();
 var nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey('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');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var run = false;
@@ -106,8 +108,7 @@ function sendemail(to) {
 
     mailOptions.to = to;
     console.log('sending to ' + JSON.stringify(mailOptions));
-
-    transport.sendMail(mailOptions, function(error, info){
+sgMail.send(mailOptions,function(error, info){
         if (error) {
             console.log(error);
         } else {
@@ -128,4 +129,6 @@ function sendemail(to) {
             }
         }
     });
+    );
+
 }
